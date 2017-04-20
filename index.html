@@ -1,0 +1,1615 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>AQA Assembly Language</title>
+    <meta name="viewport" content="width=1000, initial-scale=1.0, maximum-scale=1.0">
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <!-- FlatUI theme -->
+    <link rel="stylesheet" href="https://designmodo.github.io/Flat-UI/dist/css/flat-ui.css">
+    <!-- Font Awesome Icons -->
+    <script src="https://use.fontawesome.com/029a16fff3.js"></script>
+    
+    <style>
+        .btn-success {
+            background-color: #2ecc71 !important;
+        }
+        .btn-danger {
+            background-color: #e74c3c !important;
+        }
+        .btn-info {
+            background-color: #3498db !important;
+        }
+        .navbar {
+            border-radius: 0px;
+            margin: 0;
+        }
+        .navbar-brand:hover {
+            color: #fff !important;
+        }
+        #editor {
+            width: 100%;
+            height: calc(100vh - 53px);
+            padding: 0;
+            margin: 0;
+            resize: none;
+        }
+        .table {
+            font-size: 16px;
+        }
+        #output {
+            color: #000;
+            background-color: #ecf0f1;
+            padding: 0px 5px;
+            font-size: 14px;
+        }
+        #error {
+            color: #c0392b;
+        }
+        #status:hover {
+            color: #fff;
+        }
+    </style>
+    
+</head>
+<body>
+    
+    <nav class="navbar navbar-inverse navbar-embossed" role="navigation">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-01">
+                <span class="sr-only">Toggle navigation</span>
+            </button>
+            <a class="navbar-brand">AQA Assembly Language</a>
+        </div>
+        <div class="collapse navbar-collapse" id="navbar-collapse-01">
+            <ul class="nav navbar-nav navbar-left">
+                <ul class="navbar-form navbar-left">
+                    <button onclick="document.form.submit()" class="btn btn-success">Run &nbsp;<i class="fa fa-play"></i></button>
+                    <button onclick="Reset()" class="btn btn-danger">Reset &nbsp;<i class="fa fa-refresh"></i></button>
+                    <button onclick="StepForward()" class="btn btn-info">Step &nbsp;<i class="fa fa-step-forward"></i></button>
+                </ul>
+                <li><a id="status">Program Stopped!</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="http://filestore.aqa.org.uk/resources/computing/AQA-75162-75172-ALI.PDF" target="_blank">Assembly Sheet <i class="fa fa-external-link"></i></a></li>
+            </ul>
+        </div><!-- /.navbar-collapse -->
+    </nav>
+    
+    <div class="row col-md-12">
+        <div class="col-md-6">
+            <form id="form" name="form" action="javascript:Run()">
+                <textarea name="code" class="form-control" id="editor" rows="20"></textarea>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <div class="col-md-4">
+                <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th>Flag</th>
+                        <th>Value</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>=</td>
+                        <td id="FlagEqualTo"></td>
+                      </tr>
+                      <tr>
+                        <td>!=</td>
+                        <td id="FlagNotEqualTo"></td>
+                      </tr>
+                      <tr>
+                        <td>></td>
+                        <td id="FlagGreaterThan"></td>
+                      </tr>
+                      <tr>
+                        <td><</td>
+                        <td id="FlagLessThan"></td>
+                      </tr>
+                    </tbody>
+                  </table>
+            </div>
+            <div class="col-md-4">
+                <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th>Memory</th>
+                        <th>Value</th>
+                        <th>Binary</th>
+                      </tr>
+                    </thead>
+                    <tbody id="memory">
+                    </tbody>
+                  </table>
+            </div>
+            <div class="col-md-4">
+                <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th>Register</th>
+                        <th>Value</th>
+                        <th>Binary</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>R0</td>
+                        <td id="R0Val"></td>
+                        <td id="R0Bin"></td>
+                      </tr>
+                      <tr>
+                        <td>R1</td>
+                        <td id="R1Val"></td>
+                        <td id="R1Bin"></td>
+                      </tr>
+                      <tr>
+                        <td>R2</td>
+                        <td id="R2Val"></td>
+                        <td id="R2Bin"></td>
+                      </tr>
+                      <tr>
+                        <td>R3</td>
+                        <td id="R3Val"></td>
+                        <td id="R3Bin"></td>
+                      </tr>
+                      <tr>
+                        <td>R4</td>
+                        <td id="R4Val"></td>
+                        <td id="R4Bin"></td>
+                      </tr>
+                      <tr>
+                        <td>R5</td>
+                        <td id="R5Val"></td>
+                        <td id="R5Bin"></td>
+                      </tr>
+                      <tr>
+                        <td>R6</td>
+                        <td id="R6Val"></td>
+                        <td id="R6Bin"></td>
+                      </tr>
+                      <tr>
+                        <td>R7</td>
+                        <td id="R7Val"></td>
+                        <td id="R7Bin"></td>
+                      </tr>
+                      <tr>
+                        <td>R8</td>
+                        <td id="R8Val"></td>
+                        <td id="R8Bin"></td>
+                      </tr>
+                      <tr>
+                        <td>R9</td>
+                        <td id="R9Val"></td>
+                        <td id="R9Bin"></td>
+                      </tr>
+                      <tr>
+                        <td>R10</td>
+                        <td id="R10Val"></td>
+                        <td id="R10Bin"></td>
+                      </tr>
+                      <tr>
+                        <td>R11</td>
+                        <td id="R11Val"></td>
+                        <td id="R11Bin"></td>
+                      </tr>
+                      <tr>
+                        <td>R12</td>
+                        <td id="R12Val"></td>
+                        <td id="R12Bin"></td>
+                      </tr>
+                    </tbody>
+                  </table>
+            </div>
+            <div class="col-md-12">
+                <p id="output"></p>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+<script type="text/javascript">
+    document.getElementById("editor").placeholder = "  // AQA Assembly Language\n  // You can enter commands such as:\n  // MOV R0, #19\n  // You can find all the commands by clicking the Assembly Sheet link (top right)\n \n  // You can use Registers 0 to 12\n  // You can use labels with branches to go to certain parts fo the program";
+    
+    var Mem = [];
+    var Reg = [];
+    var Flags = [];
+    var Errors = [];
+    var Labels = [];
+    var Rd;
+    var Rn;
+    var MemRef;
+    var OperAnds;
+    var Index;
+    var LastIndex;
+    var Count = 0;
+    
+    function LDR(Rd, MemRef) {
+        Reg[Rd] = Mem[MemRef];
+        return Reg[Rd];
+    }
+    function STR(Rd, MemRef) {
+        Mem[MemRef] = Reg[Rd];
+        return Mem[MemRef];
+    }
+    function ADD(Rd, Rn, OperAnds) {
+        Reg[Rd] = Reg[Rn] + parseInt(OperAnds, 10);
+        return Reg[Rd];
+    }
+    function SUB(Rd, Rn, OperAnds) {
+        Reg[Rd] = Reg[Rn] - parseInt(OperAnds, 10);
+        return Reg[Rd];
+    }
+    function MOV(Rd, OperAnds) {
+        Reg[Rd] = parseInt(OperAnds, 10);
+        return Reg[Rd];
+    }
+    function CMP(Rn, OperAnds) {
+        Flags['EqualTo'] = false;
+        Flags['NotEqualTo'] = false;
+        Flags['GreaterThan'] = false;
+        Flags['LessThan'] = false;
+        
+        if(Reg[Rn] == OperAnds) {
+            Flags['EqualTo'] = true;
+        }
+        if(Reg[Rn] != OperAnds) {
+            Flags['NotEqualTo'] = true;
+        }
+        if(Reg[Rn] > OperAnds) {
+            Flags['GreaterThan'] = true;
+        }
+        if(Reg[Rn] < OperAnds) {
+            Flags['LessThan'] = true;
+        }
+        return Flags;
+    }
+    function Branch(Label) {
+        for(var p = 0;p < Labels.length;p++){
+            if(Label == Labels[p]) {
+                return p;
+            }
+        }
+    }
+    function BEQ(Label) {
+        if(Flags['EqualTo'] = true) {
+            for(var p = 0;p < Labels.length;p++){
+                if(Label == Labels[p]) {
+                    return p;
+                }
+            }
+        }
+        return
+    }
+    function BNE(Label) {
+        if(Flags['NotEqualTo'] = true) {
+            for(var p = 0;p < Labels.length;p++){
+                if(Label == Labels[p]) {
+                    return p;
+                }
+            }
+        }
+        return
+    }
+    function BGT(Label) {
+        if(Flags['GreaterThan'] = true) {
+            for(var p = 0;p < Labels.length;p++){
+                if(Label == Labels[p]) {
+                    return p;
+                }
+            }
+        }
+        return
+    }
+    function BLT(Label) {
+        if(Flags['LessThan'] = true) {
+            for(var p = 0;p < Labels.length;p++){
+                if(Label == Labels[p]) {
+                    return p;
+                }
+            }
+        }
+        return
+    }
+    function AND(Rd, Rn, OperAnds) {
+        Reg[Rd] = Reg[Rn] & OperAnds;
+        return Reg[Rd];
+    }
+    function ORR(Rd, Rn, OperAnds) {
+        Reg[Rd] = Reg[Rn] | OperAnds;
+        return Reg[Rd];
+    }
+    function EOR(Rd, Rn, OperAnds) {
+        Reg[Rd] = Reg[Rn] ^ OperAnds;
+        return Reg[Rd];
+    }
+    function MVN(Rd, OperAnds) {
+        Reg[Rd] = ~ OperAnds;
+        return Reg[Rd];
+    }
+    function LSL(Rd, Rn, OperAnds) {
+        Reg[Rd] = Reg[Rn] << OperAnds;
+        return Reg[Rd];
+    }
+    function LSR(Rd, Rn, OperAnds) {
+        Reg[Rd] = Reg[Rn] >> OperAnds;
+        return Reg[Rd];
+    }
+    
+    function DisplayErrors() {
+        for (var i = 0; i < Errors.length; i++) {
+            if(document.getElementById("output").innerHTML == '') {
+                document.getElementById("output").innerHTML = document.getElementById("output").innerHTML + '<span id="error">' + Errors[i] + '</span>';
+            } else {
+                document.getElementById("output").innerHTML = document.getElementById("output").innerHTML + '<br><span id="error">' + Errors[i] + '</span>';
+            }
+        }
+        Errors = [];
+    }
+    function DisplayMemory() {
+        var table = document.getElementById("memory");
+        while(table.rows.length > 0) {
+          table.deleteRow(0);
+        }
+        var RowCount = 0;
+        for (var Loc in Mem) {
+          if (Object.prototype.hasOwnProperty.call(Mem,Loc)) { 
+            // Find a <table> element with id="myTable":
+            var row = table.insertRow(RowCount);
+            row.id = Loc;
+            var cell1 = row.insertCell(0);
+            var cell2 = row.insertCell(1);
+            var cell3 = row.insertCell(2);
+            cell1.innerHTML = Loc;
+            cell2.innerHTML = Mem[Loc];
+            cell3.innerHTML = (Mem[Loc] >>> 0).toString(2);
+            while (cell3.innerHTML.length < 8) {
+                cell3.innerHTML = "0" + cell3.innerHTML;
+            }
+            RowCount += 1;
+          }
+        }
+    }
+    function DisplayRegisters() {
+        for(var i = 0;i < 13;i++) {
+            document.getElementById("R" + i + "Val").innerHTML = Reg[i];
+            document.getElementById("R" + i + "Bin").innerHTML = (Reg[i] >>> 0).toString(2);
+            while (document.getElementById("R" + i + "Bin").innerHTML.length < 8) {
+                document.getElementById("R" + i + "Bin").innerHTML = "0" + document.getElementById("R" + i + "Bin").innerHTML;
+            }
+        }
+    }
+    function DisplayFlags() {
+        document.getElementById("FlagEqualTo").innerHTML = Flags['EqualTo'];
+        document.getElementById("FlagNotEqualTo").innerHTML = Flags['NotEqualTo'];
+        document.getElementById("FlagGreaterThan").innerHTML = Flags['GreaterThan'];
+        document.getElementById("FlagLessThan").innerHTML = Flags['LessThan'];
+    }
+    
+    function Run() {
+        document.getElementById("status").innerHTML = "Program Running!";
+        var lines = document.getElementById("form").elements.namedItem("code").value.split('\n');
+        for(var i = 0;i < lines.length;i++){
+            //code here using lines[i] which will give you each line
+            var line = lines[i];
+            if(line.includes(":")) {
+                line = line.replace(":", " ").trim();
+                Labels[i] = line;
+            }
+        }
+        RunI:
+        for(var i = 0;i < lines.length;i++){
+            //code here using lines[i] which will give you each line
+            var line = lines[i].trim();
+            Index = line.indexOf(",");
+            
+            if(line.startsWith("LDR ")) {
+                if(line.substr(4, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        Index = line.indexOf(",");
+                        Rd = line.substr(5, Index - 5);
+                        //check Rd is an allowed register
+                        if(Rd > 12) {
+                            Errors.push('LDR Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                            break RunI;
+                        }
+                    } else {
+                        Errors.push('LDR Register Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                } else {
+                    Errors.push('LDR Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+                if(!(isNaN(line.substr(8, line.length)))) {
+                    MemRef = line.substr(8, line.length);
+                } else {
+                    Errors.push('LDR Memory Reference Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+                LDR(Rd, MemRef);
+            }
+            if(line.startsWith("STR ")) {
+                if(line.substr(4, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        Index = line.indexOf(",");
+                        Rd = line.substr(5, Index - 5);
+                        //check Rd is an allowed register
+                        if(Rd > 12) {
+                            Errors.push('STR Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                            break RunI;
+                        }
+                    } else {
+                        Errors.push('STR Register Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                } else {
+                    Errors.push('STR Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+                if(!(isNaN(line.substr(8, line.length)))) {
+                    MemRef = line.substr(8, line.length);
+                } else {
+                    Errors.push('STR Memory Reference Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+                STR(Rd, MemRef);
+            }
+            if(line.startsWith("ADD ")) {
+                if(line.substr(4, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        Index = line.indexOf(",");
+                        Rd = line.substr(5, Index - 5);
+                        //check Rd is an allowed register
+                        if(Rd > 12) {
+                            Errors.push('AND Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                            break RunI;
+                        }
+                    } else {
+                        Errors.push('AND Register Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                } else {
+                    Errors.push('AND Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+                if(line.substr(Index + 2, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        LastIndex = Index;
+                        Index = line.substr(LastIndex + 1, line.length).indexOf(",") + LastIndex + 1;
+                        Rn = line.substr(LastIndex + 3, Index - LastIndex - 3);
+                        if(Rn > 12) {
+                            Errors.push('ADD Register Value Rn Invalid On Line ' + parseInt(i + 1));
+                            break RunI;
+                        }
+                    } else {
+                        Errors.push('ADD Register Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                } else {
+                    Errors.push('ADD Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+                if(line.substr(Index + 2, 2).startsWith("#")){
+                    if(!(isNaN(line.substr(Index + 3, line.length)))) {
+                        OperAnds = line.substr(Index + 3, line.length);
+                    } else {
+                        Errors.push('ADD Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                } else if(line.substr(Index + 2, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(Index + 3, line.length)))) {
+                        OperAnds = line.substr(Index + 3, line.length);
+                        if(OperAnds > 12) {
+                            Errors.push('ADD Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                            break RunI;
+                        }
+                    } else {
+                        Errors.push('ADD Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                    OperAnds = Reg[OperAnds];
+                } else {
+                    Errors.push('ADD Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+                ADD(Rd, Rn, OperAnds);
+            }
+            if(line.startsWith("SUB ")) {
+                if(line.substr(4, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        Index = line.indexOf(",");
+                        Rd = line.substr(5, Index - 5);
+                        //check Rd is an allowed register
+                        if(Rd > 12) {
+                            Errors.push('SUB Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                            break RunI;
+                        }
+                    } else {
+                        Errors.push('SUB Register Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                } else {
+                    Errors.push('SUB Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+                if(line.substr(Index + 2, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        LastIndex = Index;
+                        Index = line.substr(LastIndex + 1, line.length).indexOf(",") + LastIndex + 1;
+                        Rn = line.substr(LastIndex + 3, Index - LastIndex - 3);
+                        if(Rn > 12) {
+                            Errors.push('SUB Register Value Rn Invalid On Line ' + parseInt(i + 1));
+                            break RunI;
+                        }
+                    } else {
+                        Errors.push('SUB Register Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                } else {
+                    Errors.push('SUB Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+                if(line.substr(Index + 2, 2).startsWith("#")){
+                    if(!(isNaN(line.substr(Index + 3, line.length)))) {
+                        OperAnds = line.substr(Index + 3, line.length);
+                    } else {
+                        Errors.push('SUB Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                } else if(line.substr(Index + 2, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(Index + 3, line.length)))) {
+                        OperAnds = line.substr(Index + 3, line.length);
+                        if(OperAnds > 12) {
+                            Errors.push('SUB Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                            break RunI;
+                        }
+                    } else {
+                        Errors.push('SUB Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                    OperAnds = Reg[OperAnds];
+                } else {
+                    Errors.push('SUB Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+                SUB(Rd, Rn, OperAnds);
+            }
+            if(line.startsWith("MOV ")) {
+                if(line.substr(4, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        Index = line.indexOf(",");
+                        Rd = line.substr(5, Index - 5);
+                        //check Rd is an allowed register
+                        if(Rd > 12) {
+                            Errors.push('MOV Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                            break RunI;
+                        }
+                    } else {
+                        Errors.push('MOV Register Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                } else {
+                    Errors.push('MOV Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+                if(line.substr(Index + 2, 2).startsWith("#")){
+                    if(!(isNaN(line.substr(Index + 3, line.length)))) {
+                        OperAnds = line.substr(Index + 3, line.length);
+                    } else {
+                        Errors.push('MOV Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                } else if(line.substr(Index + 2, 2).startsWith("R")){
+                    Rn = line.substr(Index + 3, line.length);
+                    if(Rn > 12) {
+                        Errors.push('MOV Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                    OperAnds = Reg[Rn];
+                } else {
+                    Errors.push('MOV Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+                MOV(Rd, OperAnds);
+            }
+            if(line.startsWith("CMP ")) {
+                if(line.substr(4, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        Index = line.indexOf(",");
+                        Rd = line.substr(5, Index - 5);
+                        //check Rd is an allowed register
+                        if(Rd > 12) {
+                            Errors.push('CMP Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                            break RunI;
+                        }
+                    } else {
+                        Errors.push('CMP Register Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                } else {
+                    Errors.push('CMP Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+                if(line.substr(Index + 2, 2).startsWith("#")){
+                    if(!(isNaN(line.substr(Index + 3, line.length)))) {
+                        OperAnds = line.substr(Index + 3, line.length);
+                    } else {
+                        Errors.push('CMP Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                } else if(line.substr(Index + 2, 2).startsWith("R")){
+                    OperAnds = line.substr(Index + 3, line.length);
+                    if(OperAnds > 12) {
+                        Errors.push('CMP Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                    OperAnds = Reg[OperAnds];
+                } else {
+                    Errors.push('CMP Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+                CMP(Rd, OperAnds);
+            }
+            if(line.startsWith("B ")) { // B Label
+                line = line.replace("B", " ").trim();
+                var p = Branch(line);
+                if(p != 'undefined'){
+                    i = p;
+                } else {
+                    Errors.push('B Label Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+            }
+            if(line.startsWith("BEQ ")) { // BEQ Label
+                line = line.replace("BEQ", " ").trim();
+                var p = Branch(line);
+                if(p){
+                    i = p;
+                } else if(p == 0){
+                    i = p;
+                } else {
+                    Errors.push('BEQ Label Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+            }
+            if(line.startsWith("BNE ")) { // BNE Label
+                line = line.replace("BNE", " ").trim();
+                var p = Branch(line);
+                if(p){
+                    i = p;
+                } else if(p == 0){
+                    i = p;
+                } else {
+                    Errors.push('BNE Label Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+            }
+            if(line.startsWith("BGT ")) { // BGT Label
+                line = line.replace("BLT", " ").trim();
+                var p = Branch(line);
+                if(p){
+                    i = p;
+                } else if(p == 0){
+                    i = p;
+                } else {
+                    Errors.push('BGT Label Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+            }
+            if(line.startsWith("BLT ")) { // BLT Label
+                line = line.replace("BLT", " ").trim();
+                var p = Branch(line);
+                if(p){
+                    i = p;
+                } else if(p == 0){
+                    i = p;
+                } else {
+                    Errors.push('BLT Label Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+            }
+            if(line.startsWith("AND ")) {
+                if(line.substr(4, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        Index = line.indexOf(",");
+                        Rd = line.substr(5, Index - 5);
+                        //check Rd is an allowed register
+                        if(Rd > 12) {
+                            Errors.push('AND Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                            break RunI;
+                        }
+                    } else {
+                        Errors.push('AND Register Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                } else {
+                    Errors.push('AND Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+                if(line.substr(Index + 2, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        LastIndex = Index;
+                        Index = line.substr(LastIndex + 1, line.length).indexOf(",") + LastIndex + 1;
+                        Rn = line.substr(LastIndex + 3, Index - LastIndex - 3);
+                        if(Rn > 12) {
+                            Errors.push('AND Register Value Rn Invalid On Line ' + parseInt(i + 1));
+                            break RunI;
+                        }
+                    } else {
+                        Errors.push('AND Register Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                } else {
+                    Errors.push('AND Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+                if(line.substr(Index + 2, 2).startsWith("#")){
+                    if(!(isNaN(line.substr(Index + 3, line.length)))) {
+                        OperAnds = line.substr(Index + 3, line.length);
+                    } else {
+                        Errors.push('AND Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                } else if(line.substr(Index + 2, 2).startsWith("R")){
+                    Rn = line.substr(Index + 3, line.length);
+                    if(Rn > 12) {
+                        Errors.push('AND Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                    OperAnds = Reg[Rn];
+                } else {
+                    Errors.push('AND Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+                AND(Rd, Rn, OperAnds);
+            }
+            if(line.startsWith("ORR ")) {
+                if(line.substr(4, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        Index = line.indexOf(",");
+                        Rd = line.substr(5, Index - 5);
+                        //check Rd is an allowed register
+                        if(Rd > 12) {
+                            Errors.push('ORR Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                            break RunI;
+                        }
+                    } else {
+                        Errors.push('ORR Register Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                } else {
+                    Errors.push('ORR Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+                if(line.substr(Index + 2, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        LastIndex = Index;
+                        Index = line.substr(LastIndex + 1, line.length).indexOf(",") + LastIndex + 1;
+                        Rn = line.substr(LastIndex + 3, Index - LastIndex - 3);
+                        if(Rn > 12) {
+                            Errors.push('ORR Register Value Rn Invalid On Line ' + parseInt(i + 1));
+                            break RunI;
+                        }
+                    } else {
+                        Errors.push('ORR Register Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                } else {
+                    Errors.push('ORR Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+                if(line.substr(Index + 2, 2).startsWith("#")){
+                    if(!(isNaN(line.substr(Index + 3, line.length)))) {
+                        OperAnds = line.substr(Index + 3, line.length);
+                    } else {
+                        Errors.push('ORR Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                } else if(line.substr(Index + 2, 2).startsWith("R")){
+                    Rn = line.substr(Index + 3, line.length);
+                    if(Rn > 12) {
+                        Errors.push('ORR Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                    OperAnds = Reg[Rn];
+                } else {
+                    Errors.push('ORR Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+                ORR(Rd, Rn, OperAnds);
+            }
+            if(line.startsWith("EOR ")) {
+                if(line.substr(4, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        Index = line.indexOf(",");
+                        Rd = line.substr(5, Index - 5);
+                        //check Rd is an allowed register
+                        if(Rd > 12) {
+                            Errors.push('EOR Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                            break RunI;
+                        }
+                    } else {
+                        Errors.push('EOR Register Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                } else {
+                    Errors.push('EOR Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+                if(line.substr(Index + 2, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        LastIndex = Index;
+                        Index = line.substr(LastIndex + 1, line.length).indexOf(",") + LastIndex + 1;
+                        Rn = line.substr(LastIndex + 3, Index - LastIndex - 3);
+                        if(Rn > 12) {
+                            Errors.push('EOR Register Value Rn Invalid On Line ' + parseInt(i + 1));
+                            break RunI;
+                        }
+                    } else {
+                        Errors.push('EOR Register Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                } else {
+                    Errors.push('EOR Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+                if(line.substr(Index + 2, 2).startsWith("#")){
+                    if(!(isNaN(line.substr(Index + 3, line.length)))) {
+                        OperAnds = line.substr(Index + 3, line.length);
+                    } else {
+                        Errors.push('EOR Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                } else if(line.substr(Index + 2, 2).startsWith("R")){
+                    Rn = line.substr(Index + 3, line.length);
+                    if(Rn > 12) {
+                        Errors.push('EOR Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                    OperAnds = Reg[Rn];
+                } else {
+                    Errors.push('EOR Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+                EOR(Rd, Rn, OperAnds);
+            }
+            if(line.startsWith("MVN ")) {
+                if(line.substr(4, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        Index = line.indexOf(",");
+                        Rd = line.substr(5, Index - 5);
+                        //check Rd is an allowed register
+                        if(Rd > 12) {
+                            Errors.push('MVN Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                            break RunI;
+                        }
+                    } else {
+                        Errors.push('MVN Register Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                } else {
+                    Errors.push('MVN Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+                if(line.substr(8, 2).startsWith("#")){
+                    if(/\d/.test(line.substr(9, line.length))) {
+                        OperAnds = line.substr(9, line.length);
+                    } else {
+                        Errors.push('MVN Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                } else if(line.substr(8, 2).startsWith("R")){
+                    Index = line.indexOf(",");
+                    Rn = line.substr(9, line.length);
+                    if(Rn > 12) {
+                        Errors.push('MVN Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                    OperAnds = Reg[Rn];
+                } else {
+                    Errors.push('MVN Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+                MVN(Rd, OperAnds);
+            }
+            if(line.startsWith("LSL ")) {
+                if(line.substr(4, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        Index = line.indexOf(",");
+                        Rd = line.substr(5, Index - 5);
+                        //check Rd is an allowed register
+                        if(Rd > 12) {
+                            Errors.push('LSL Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                            break RunI;
+                        }
+                    } else {
+                        Errors.push('LSL Register Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                } else {
+                    Errors.push('LSL Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+                if(line.substr(Index + 2, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        LastIndex = Index;
+                        Index = line.substr(LastIndex + 1, line.length).indexOf(",") + LastIndex + 1;
+                        Rn = line.substr(LastIndex + 3, Index - LastIndex - 3);
+                        if(Rn > 12) {
+                            Errors.push('LSL Register Value Rn Invalid On Line ' + parseInt(i + 1));
+                            break RunI;
+                        }
+                    } else {
+                        Errors.push('LSL Register Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                } else {
+                    Errors.push('LSL Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+                if(line.substr(Index + 2, 2).startsWith("#")){
+                    if(!(isNaN(line.substr(Index + 3, line.length)))) {
+                        OperAnds = line.substr(Index + 3, line.length);
+                    } else {
+                        Errors.push('LSL Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                } else if(line.substr(Index + 2, 2).startsWith("R")){
+                    Rn = line.substr(Index + 3, line.length);
+                    if(Rn > 12) {
+                        Errors.push('LSL Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                    OperAnds = Reg[Rn];
+                } else {
+                    Errors.push('LSL Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+                LSL(Rd, Rn, OperAnds);
+            }
+            if(line.startsWith("LSR ")) {
+                if(line.substr(4, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        Index = line.indexOf(",");
+                        Rd = line.substr(5, Index - 5);
+                        //check Rd is an allowed register
+                        if(Rd > 12) {
+                            Errors.push('LSR Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                            break RunI;
+                        }
+                    } else {
+                        Errors.push('LSR Register Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                } else {
+                    Errors.push('LSR Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+                if(line.substr(Index + 2, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        LastIndex = Index;
+                        Index = line.substr(LastIndex + 1, line.length).indexOf(",") + LastIndex + 1;
+                        Rn = line.substr(LastIndex + 3, Index - LastIndex - 3);
+                        if(Rn > 12) {
+                            Errors.push('LSR Register Value Rn Invalid On Line ' + parseInt(i + 1));
+                            break RunI;
+                        }
+                    } else {
+                        Errors.push('LSR Register Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                } else {
+                    Errors.push('LSR Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+                if(line.substr(Index + 2, 2).startsWith("#")){
+                    if(!(isNaN(line.substr(Index + 3, line.length)))) {
+                        OperAnds = line.substr(Index + 3, line.length);
+                    } else {
+                        Errors.push('LSR Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                } else if(line.substr(Index + 2, 2).startsWith("R")){
+                    Rn = line.substr(Index + 3, line.length);
+                    if(Rn > 12) {
+                        Errors.push('LSR Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                        break RunI;
+                    }
+                    OperAnds = Reg[Rn];
+                } else {
+                    Errors.push('LSR Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                    break RunI;
+                }
+                LSR(Rd, Rn, OperAnds);
+            }
+            if(line.startsWith("HALT")) {
+               break RunI; 
+            }
+        }
+        DisplayErrors();
+        DisplayMemory();
+        DisplayRegisters();
+        DisplayFlags();
+    }
+    function StepForward() {
+        document.getElementById("status").innerHTML = "Program Running!";
+        var lines = document.getElementById("form").elements.namedItem("code").value.split('\n');
+        for(var i = 0;i < lines.length;i++){
+            //code here using lines[i] which will give you each line
+            var line = lines[i];
+            if(line.includes(":")) {
+                line = line.replace(":", " ").trim();
+                Labels[i] = line;
+            }
+        }
+        
+        i = Count;
+        
+        document.getElementById("output").innerHTML = "Line: " + i;
+        
+            //code here using lines[i] which will give you each line
+            if(i < lines.length){
+                line = lines[i].trim();
+                Index = line.indexOf(",");
+            } else {
+                document.getElementById("status").innerHTML = "Program Stopped!";
+            }
+            
+            if(line.startsWith("LDR ")) {
+                if(line.substr(4, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        Index = line.indexOf(",");
+                        Rd = line.substr(5, Index - 5);
+                        //check Rd is an allowed register
+                        if(Rd > 12) {
+                            Errors.push('LDR Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                        }
+                    } else {
+                        Errors.push('LDR Register Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                } else {
+                    Errors.push('LDR Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                }
+                if(!(isNaN(line.substr(8, line.length)))) {
+                    MemRef = line.substr(8, line.length);
+                } else {
+                    Errors.push('LDR Memory Reference Invalid On Line ' + parseInt(i + 1));
+                }
+                LDR(Rd, MemRef);
+            }
+            if(line.startsWith("STR ")) {
+                if(line.substr(4, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        Index = line.indexOf(",");
+                        Rd = line.substr(5, Index - 5);
+                        //check Rd is an allowed register
+                        if(Rd > 12) {
+                            Errors.push('STR Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                        }
+                    } else {
+                        Errors.push('STR Register Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                } else {
+                    Errors.push('STR Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                }
+                if(!(isNaN(line.substr(8, line.length)))) {
+                    MemRef = line.substr(8, line.length);
+                } else {
+                    Errors.push('STR Memory Reference Invalid On Line ' + parseInt(i + 1));
+                }
+                STR(Rd, MemRef);
+            }
+            if(line.startsWith("ADD ")) {
+                if(line.substr(4, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        Index = line.indexOf(",");
+                        Rd = line.substr(5, Index - 5);
+                        //check Rd is an allowed register
+                        if(Rd > 12) {
+                            Errors.push('AND Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                        }
+                    } else {
+                        Errors.push('AND Register Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                } else {
+                    Errors.push('AND Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                }
+                if(line.substr(Index + 2, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        LastIndex = Index;
+                        Index = line.substr(LastIndex + 1, line.length).indexOf(",") + LastIndex + 1;
+                        Rn = line.substr(LastIndex + 3, Index - LastIndex - 3);
+                        if(Rn > 12) {
+                            Errors.push('ADD Register Value Rn Invalid On Line ' + parseInt(i + 1));
+                        }
+                    } else {
+                        Errors.push('ADD Register Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                } else {
+                    Errors.push('ADD Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                }
+                if(line.substr(Index + 2, 2).startsWith("#")){
+                    if(!(isNaN(line.substr(Index + 3, line.length)))) {
+                        OperAnds = line.substr(Index + 3, line.length);
+                    } else {
+                        Errors.push('ADD Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                } else if(line.substr(Index + 2, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(Index + 3, line.length)))) {
+                        OperAnds = line.substr(Index + 3, line.length);
+                        if(OperAnds > 12) {
+                            Errors.push('ADD Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                        }
+                    } else {
+                        Errors.push('ADD Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                    OperAnds = Reg[OperAnds];
+                } else {
+                    Errors.push('ADD Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                }
+                ADD(Rd, Rn, OperAnds);
+            }
+            if(line.startsWith("SUB ")) {
+                if(line.substr(4, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        Index = line.indexOf(",");
+                        Rd = line.substr(5, Index - 5);
+                        //check Rd is an allowed register
+                        if(Rd > 12) {
+                            Errors.push('SUB Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                        }
+                    } else {
+                        Errors.push('SUB Register Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                } else {
+                    Errors.push('SUB Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                }
+                if(line.substr(Index + 2, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        LastIndex = Index;
+                        Index = line.substr(LastIndex + 1, line.length).indexOf(",") + LastIndex + 1;
+                        Rn = line.substr(LastIndex + 3, Index - LastIndex - 3);
+                        if(Rn > 12) {
+                            Errors.push('SUB Register Value Rn Invalid On Line ' + parseInt(i + 1));
+                        }
+                    } else {
+                        Errors.push('SUB Register Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                } else {
+                    Errors.push('SUB Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                }
+                if(line.substr(Index + 2, 2).startsWith("#")){
+                    if(!(isNaN(line.substr(Index + 3, line.length)))) {
+                        OperAnds = line.substr(Index + 3, line.length);
+                    } else {
+                        Errors.push('SUB Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                } else if(line.substr(Index + 2, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(Index + 3, line.length)))) {
+                        OperAnds = line.substr(Index + 3, line.length);
+                        if(OperAnds > 12) {
+                            Errors.push('SUB Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                        }
+                    } else {
+                        Errors.push('SUB Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                    OperAnds = Reg[OperAnds];
+                } else {
+                    Errors.push('SUB Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                }
+                SUB(Rd, Rn, OperAnds);
+            }
+            if(line.startsWith("MOV ")) {
+                if(line.substr(4, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        Index = line.indexOf(",");
+                        Rd = line.substr(5, Index - 5);
+                        //check Rd is an allowed register
+                        if(Rd > 12) {
+                            Errors.push('MOV Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                        }
+                    } else {
+                        Errors.push('MOV Register Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                } else {
+                    Errors.push('MOV Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                }
+                if(line.substr(Index + 2, 2).startsWith("#")){
+                    if(!(isNaN(line.substr(Index + 3, line.length)))) {
+                        OperAnds = line.substr(Index + 3, line.length);
+                    } else {
+                        Errors.push('MOV Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                } else if(line.substr(Index + 2, 2).startsWith("R")){
+                    Rn = line.substr(Index + 3, line.length);
+                    if(Rn > 12) {
+                        Errors.push('MOV Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                    OperAnds = Reg[Rn];
+                } else {
+                    Errors.push('MOV Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                }
+                MOV(Rd, OperAnds);
+            }
+            if(line.startsWith("CMP ")) {
+                if(line.substr(4, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        Index = line.indexOf(",");
+                        Rd = line.substr(5, Index - 5);
+                        //check Rd is an allowed register
+                        if(Rd > 12) {
+                            Errors.push('CMP Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                        }
+                    } else {
+                        Errors.push('CMP Register Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                } else {
+                    Errors.push('CMP Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                }
+                if(line.substr(Index + 2, 2).startsWith("#")){
+                    if(!(isNaN(line.substr(Index + 3, line.length)))) {
+                        OperAnds = line.substr(Index + 3, line.length);
+                    } else {
+                        Errors.push('CMP Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                } else if(line.substr(Index + 2, 2).startsWith("R")){
+                    OperAnds = line.substr(Index + 3, line.length);
+                    if(OperAnds > 12) {
+                        Errors.push('CMP Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                    OperAnds = Reg[OperAnds];
+                } else {
+                    Errors.push('CMP Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                }
+                CMP(Rd, OperAnds);
+            }
+            if(line.startsWith("B ")) { // B Label
+                line = line.replace("B", " ").trim();
+                var p = Branch(line);
+                if(p != 'undefined'){
+                    i = p;
+                } else {
+                    Errors.push('B Label Invalid On Line ' + parseInt(i + 1));
+                }
+            }
+            if(line.startsWith("BEQ ")) { // BEQ Label
+                line = line.replace("BEQ", " ").trim();
+                var p = Branch(line);
+                if(p){
+                    Count = p;
+                }
+                if(p == 0){
+                    Count = p;
+                }
+            }
+            if(line.startsWith("BNE ")) { // BNE Label
+                line = line.replace("BNE", " ").trim();
+                var p = Branch(line);
+                if(p){
+                    Count = p;
+                }
+                if(p == 0){
+                    Count = p;
+                }
+            }
+            if(line.startsWith("BGT ")) { // BGT Label
+                line = line.replace("BLT", " ").trim();
+                var p = Branch(line);
+                if(p){
+                    Count = p;
+                }
+                if(p == 0){
+                    Count = p;
+                }
+            }
+            if(line.startsWith("BLT ")) { // BLT Label
+                line = line.replace("BLT", " ").trim();
+                var p = Branch(line);
+                if(p){
+                    Count = p;
+                }
+                if(p == 0){
+                    Count = p;
+                }
+            }
+            if(line.startsWith("AND ")) {
+                if(line.substr(4, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        Index = line.indexOf(",");
+                        Rd = line.substr(5, Index - 5);
+                        //check Rd is an allowed register
+                        if(Rd > 12) {
+                            Errors.push('AND Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                        }
+                    } else {
+                        Errors.push('AND Register Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                } else {
+                    Errors.push('AND Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                }
+                if(line.substr(Index + 2, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        LastIndex = Index;
+                        Index = line.substr(LastIndex + 1, line.length).indexOf(",") + LastIndex + 1;
+                        Rn = line.substr(LastIndex + 3, Index - LastIndex - 3);
+                        if(Rn > 12) {
+                            Errors.push('AND Register Value Rn Invalid On Line ' + parseInt(i + 1));
+                        }
+                    } else {
+                        Errors.push('AND Register Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                } else {
+                    Errors.push('AND Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                }
+                if(line.substr(Index + 2, 2).startsWith("#")){
+                    if(!(isNaN(line.substr(Index + 3, line.length)))) {
+                        OperAnds = line.substr(Index + 3, line.length);
+                    } else {
+                        Errors.push('AND Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                } else if(line.substr(Index + 2, 2).startsWith("R")){
+                    Rn = line.substr(Index + 3, line.length);
+                    if(Rn > 12) {
+                        Errors.push('AND Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                    OperAnds = Reg[Rn];
+                } else {
+                    Errors.push('AND Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                }
+                AND(Rd, Rn, OperAnds);
+            }
+            if(line.startsWith("ORR ")) {
+                if(line.substr(4, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        Index = line.indexOf(",");
+                        Rd = line.substr(5, Index - 5);
+                        //check Rd is an allowed register
+                        if(Rd > 12) {
+                            Errors.push('ORR Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                        }
+                    } else {
+                        Errors.push('ORR Register Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                } else {
+                    Errors.push('ORR Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                }
+                if(line.substr(Index + 2, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        LastIndex = Index;
+                        Index = line.substr(LastIndex + 1, line.length).indexOf(",") + LastIndex + 1;
+                        Rn = line.substr(LastIndex + 3, Index - LastIndex - 3);
+                        if(Rn > 12) {
+                            Errors.push('ORR Register Value Rn Invalid On Line ' + parseInt(i + 1));
+                        }
+                    } else {
+                        Errors.push('ORR Register Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                } else {
+                    Errors.push('ORR Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                }
+                if(line.substr(Index + 2, 2).startsWith("#")){
+                    if(!(isNaN(line.substr(Index + 3, line.length)))) {
+                        OperAnds = line.substr(Index + 3, line.length);
+                    } else {
+                        Errors.push('ORR Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                } else if(line.substr(Index + 2, 2).startsWith("R")){
+                    Rn = line.substr(Index + 3, line.length);
+                    if(Rn > 12) {
+                        Errors.push('ORR Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                    OperAnds = Reg[Rn];
+                } else {
+                    Errors.push('ORR Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                }
+                ORR(Rd, Rn, OperAnds);
+            }
+            if(line.startsWith("EOR ")) {
+                if(line.substr(4, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        Index = line.indexOf(",");
+                        Rd = line.substr(5, Index - 5);
+                        //check Rd is an allowed register
+                        if(Rd > 12) {
+                            Errors.push('EOR Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                        }
+                    } else {
+                        Errors.push('EOR Register Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                } else {
+                    Errors.push('EOR Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                }
+                if(line.substr(Index + 2, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        LastIndex = Index;
+                        Index = line.substr(LastIndex + 1, line.length).indexOf(",") + LastIndex + 1;
+                        Rn = line.substr(LastIndex + 3, Index - LastIndex - 3);
+                        if(Rn > 12) {
+                            Errors.push('EOR Register Value Rn Invalid On Line ' + parseInt(i + 1));
+                        }
+                    } else {
+                        Errors.push('EOR Register Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                } else {
+                    Errors.push('EOR Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                }
+                if(line.substr(Index + 2, 2).startsWith("#")){
+                    if(!(isNaN(line.substr(Index + 3, line.length)))) {
+                        OperAnds = line.substr(Index + 3, line.length);
+                    } else {
+                        Errors.push('EOR Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                } else if(line.substr(Index + 2, 2).startsWith("R")){
+                    Rn = line.substr(Index + 3, line.length);
+                    if(Rn > 12) {
+                        Errors.push('EOR Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                    OperAnds = Reg[Rn];
+                } else {
+                    Errors.push('EOR Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                }
+                EOR(Rd, Rn, OperAnds);
+            }
+            if(line.startsWith("MVN ")) {
+                if(line.substr(4, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        Index = line.indexOf(",");
+                        Rd = line.substr(5, Index - 5);
+                        //check Rd is an allowed register
+                        if(Rd > 12) {
+                            Errors.push('MVN Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                        }
+                    } else {
+                        Errors.push('MVN Register Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                } else {
+                    Errors.push('MVN Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                }
+                if(line.substr(8, 2).startsWith("#")){
+                    if(/\d/.test(line.substr(9, line.length))) {
+                        OperAnds = line.substr(9, line.length);
+                    } else {
+                        Errors.push('MVN Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                } else if(line.substr(8, 2).startsWith("R")){
+                    Index = line.indexOf(",");
+                    Rn = line.substr(9, line.length);
+                    if(Rn > 12) {
+                        Errors.push('MVN Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                    OperAnds = Reg[Rn];
+                } else {
+                    Errors.push('MVN Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                }
+                MVN(Rd, OperAnds);
+            }
+            if(line.startsWith("LSL ")) {
+                if(line.substr(4, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        Index = line.indexOf(",");
+                        Rd = line.substr(5, Index - 5);
+                        //check Rd is an allowed register
+                        if(Rd > 12) {
+                            Errors.push('LSL Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                        }
+                    } else {
+                        Errors.push('LSL Register Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                } else {
+                    Errors.push('LSL Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                }
+                if(line.substr(Index + 2, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        LastIndex = Index;
+                        Index = line.substr(LastIndex + 1, line.length).indexOf(",") + LastIndex + 1;
+                        Rn = line.substr(LastIndex + 3, Index - LastIndex - 3);
+                        if(Rn > 12) {
+                            Errors.push('LSL Register Value Rn Invalid On Line ' + parseInt(i + 1));
+                        }
+                    } else {
+                        Errors.push('LSL Register Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                } else {
+                    Errors.push('LSL Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                }
+                if(line.substr(Index + 2, 2).startsWith("#")){
+                    if(!(isNaN(line.substr(Index + 3, line.length)))) {
+                        OperAnds = line.substr(Index + 3, line.length);
+                    } else {
+                        Errors.push('LSL Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                } else if(line.substr(Index + 2, 2).startsWith("R")){
+                    Rn = line.substr(Index + 3, line.length);
+                    if(Rn > 12) {
+                        Errors.push('LSL Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                    OperAnds = Reg[Rn];
+                } else {
+                    Errors.push('LSL Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                }
+                LSL(Rd, Rn, OperAnds);
+            }
+            if(line.startsWith("LSR ")) {
+                if(line.substr(4, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        Index = line.indexOf(",");
+                        Rd = line.substr(5, Index - 5);
+                        //check Rd is an allowed register
+                        if(Rd > 12) {
+                            Errors.push('LSR Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                        }
+                    } else {
+                        Errors.push('LSR Register Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                } else {
+                    Errors.push('LSR Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                }
+                if(line.substr(Index + 2, 2).startsWith("R")){
+                    if(!(isNaN(line.substr(5, Index - 5)))) {
+                        LastIndex = Index;
+                        Index = line.substr(LastIndex + 1, line.length).indexOf(",") + LastIndex + 1;
+                        Rn = line.substr(LastIndex + 3, Index - LastIndex - 3);
+                        if(Rn > 12) {
+                            Errors.push('LSR Register Value Rn Invalid On Line ' + parseInt(i + 1));
+                        }
+                    } else {
+                        Errors.push('LSR Register Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                } else {
+                    Errors.push('LSR Register Value Rd Invalid On Line ' + parseInt(i + 1));
+                }
+                if(line.substr(Index + 2, 2).startsWith("#")){
+                    if(!(isNaN(line.substr(Index + 3, line.length)))) {
+                        OperAnds = line.substr(Index + 3, line.length);
+                    } else {
+                        Errors.push('LSR Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                } else if(line.substr(Index + 2, 2).startsWith("R")){
+                    Rn = line.substr(Index + 3, line.length);
+                    if(Rn > 12) {
+                        Errors.push('LSR Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                    }
+                    OperAnds = Reg[Rn];
+                } else {
+                    Errors.push('LSR Operand2 Value Invalid On Line ' + parseInt(i + 1));
+                }
+                LSR(Rd, Rn, OperAnds);
+            }
+        DisplayErrors();
+        DisplayMemory();
+        DisplayRegisters();
+        DisplayFlags();
+        if(Count == i){
+            Count = parseInt(Count + 1, 10);
+        }
+    }
+    function Reset() {
+        document.getElementById("status").innerHTML = "Program Stopped!";
+        document.getElementById("output").innerHTML = "";
+        Mem = [];
+        Reg = [];
+        Flags = [];
+        Errors = [];
+        Labels = [];
+        Rd = '';
+        Rn = '';
+        MemRef = '';
+        OperAnds = '';
+        Index = '';
+        LastIndex = '';
+        Count = 0;
+        DisplayErrors();
+        DisplayMemory();
+        DisplayRegisters();
+        DisplayFlags();
+    }
+    
+    DisplayMemory();
+    DisplayRegisters();
+    DisplayErrors();
+    DisplayFlags();
+</script>
